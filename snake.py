@@ -71,6 +71,9 @@ def draw_score(score: int):
     value = score_font.render(f"SCORE: {score}", True, BLACK)
     display.blit(value,[0,0])
 
+running = True
+try_again = True
+
 
 def end_screen():
     value = score_font.render(f"SCORE: {score}", True, BLACK)
@@ -97,8 +100,7 @@ def end_screen():
                 elif event.key == pygame.K_ESCAPE:
                     try_again = False
 
-running = True
-try_again = True
+
 while try_again:     
 
     # Snake starting stats
