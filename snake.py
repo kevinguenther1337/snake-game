@@ -9,19 +9,22 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 
 # Board Stats
-BOX_SIZE = 30
+BOX_SIZE = 30 # must be number % 2 = 0 
 BOARD_SIZE = 30
 DISPLAY_SIZE = ((BOX_SIZE*BOARD_SIZE),(BOX_SIZE*BOARD_SIZE))
-
+AMOUNT_OF_APPLES = 3
 
 # Option stuff
 pygame.init()
 clock = pygame.time.Clock()
+display = pygame.display.set_mode(DISPLAY_SIZE)
+pygame.display.set_caption("Snake Game")
+
+# Fonts 
 score_font = pygame.font.SysFont("comicsansms",40)
 end_font = pygame.font.SysFont("comicsansms",20)
 lose_font = pygame.font.SysFont("comicsansms",60)
-display = pygame.display.set_mode(DISPLAY_SIZE)
-pygame.display.set_caption("Snake Game")
+
 
 # Checks if the player hits wall or himself
 def check_collision(snake: list):
@@ -36,6 +39,7 @@ def check_collision(snake: list):
 
     return True
 
+
 # Draws apple to screen
 def draw_apple(apples : list, apple_counter : int, amount_of_apples : int):
 
@@ -44,13 +48,14 @@ def draw_apple(apples : list, apple_counter : int, amount_of_apples : int):
         apple_y = random.randrange(BOX_SIZE,(DISPLAY_SIZE[1]-BOX_SIZE),BOX_SIZE)
 
         # check if apple spawns inside of snake, recurssively draws apple again
-        if (apple_x,apple_y) in snake_body:
+        if (apple_x,apple_y) in snake_body or (apple_x,apple_y) in apples:
             draw_apple(apples,apple_counter,amount_of_apples)
-
-        apples.append((apple_x,apple_y))
-        apple_counter += 1
+        else:
+            apples.append((apple_x,apple_y))
+            apple_counter += 1
 
     return True
+
 
 # Checks if the apple has been eaten
 def check_apple(snake_body: list, apples: list):
@@ -60,10 +65,37 @@ def check_apple(snake_body: list, apples: list):
         
     return True
 
+
 # Draws the current score to screen
 def draw_score(score: int):
     value = score_font.render(f"SCORE: {score}", True, BLACK)
     display.blit(value,[0,0])
+
+
+def end_screen():
+    value = score_font.render(f"SCORE: {score}", True, BLACK)
+    text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,(DISPLAY_SIZE[1]/2)-70))
+    display.blit(value,text_rect)
+
+    value = lose_font.render(f"YOU LOSE!", True, BLACK)
+    text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,DISPLAY_SIZE[1]/2))
+    display.blit(value,text_rect)
+
+    value = end_font.render(f"PRESS SAPCE TO CONTINUE OR ESACPE TO QUIT!", True, BLACK)
+    text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,(DISPLAY_SIZE[1]/2)+70))
+    display.blit(value,text_rect)
+    pygame.display.update()
+
+    while not running and try_again:
+        for event in pygame.event.get():
+            if  event.type == pygame.QUIT:
+                try_again = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    running = True
+                elif event.key == pygame.K_ESCAPE:
+                    try_again = False
 
 running = True
 try_again = True
@@ -71,8 +103,8 @@ while try_again:
 
     # Snake starting stats
     snake_length = 5
-    snake_speed = 10.0
-    speed_change = 0.25
+    snake_speed = 13.0
+    speed_change = 0.125
     snake_body = [(BOX_SIZE*BOARD_SIZE/2,BOX_SIZE*BOARD_SIZE/2)] # Starting body 
     x_change = 0
     y_change = -BOX_SIZE #UP
@@ -80,7 +112,6 @@ while try_again:
     # Game stats
     score = 0
     displaying_apple = False
-    amount_of_apples = 4
     apple_counter = 0
     apples = []
 
@@ -90,8 +121,8 @@ while try_again:
         # Key handling
         for event in pygame.event.get():
             if  event.type == pygame.QUIT:
-                running = False
-
+                pygame.quit()
+                quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     y_change = -BOX_SIZE
@@ -128,7 +159,7 @@ while try_again:
 
             # Checks if apple is on board, if not draws new apple
             if not displaying_apple:
-                displaying_apple = draw_apple(apples,apple_counter, amount_of_apples)
+                displaying_apple = draw_apple(apples,apple_counter, AMOUNT_OF_APPLES)
 
             # Check if player eats apple
             displaying_apple = check_apple(snake_body,apples)
@@ -149,30 +180,8 @@ while try_again:
         pygame.display.update()
         clock.tick(snake_speed)
     
-
-    value = score_font.render(f"SCORE: {score}", True, BLACK)
-    text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,(DISPLAY_SIZE[1]/2)-70))
-    display.blit(value,text_rect)
-
-    value = lose_font.render(f"YOU LOSE!", True, BLACK)
-    text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,DISPLAY_SIZE[1]/2))
-    display.blit(value,text_rect)
-
-    value = end_font.render(f"PRESS SAPCE TO CONTINUE OR ESACPE TO QUIT!", True, BLACK)
-    text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,(DISPLAY_SIZE[1]/2)+70))
-    display.blit(value,text_rect)
-    pygame.display.update()
-
-    while not running and try_again:
-        for event in pygame.event.get():
-            if  event.type == pygame.QUIT:
-                try_again = False
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    running = True
-                elif event.key == pygame.K_ESCAPE:
-                    try_again = False
+    # Try again part or quit 
+    end_screen()
 
 # Quit game 
 pygame.quit()
