@@ -75,7 +75,7 @@ running = True
 try_again = True
 
 
-def end_screen():
+def end_screen(running, try_again):
     value = score_font.render(f"SCORE: {score}", True, BLACK)
     text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,(DISPLAY_SIZE[1]/2)-70))
     display.blit(value,text_rect)
@@ -99,6 +99,8 @@ def end_screen():
                     running = True
                 elif event.key == pygame.K_ESCAPE:
                     try_again = False
+    
+    return running,try_again
 
 
 while try_again:     
@@ -183,7 +185,7 @@ while try_again:
         clock.tick(snake_speed)
     
     # Try again part or quit 
-    end_screen()
+    running, try_again = end_screen(running, try_again)
 
 # Quit game 
 pygame.quit()
