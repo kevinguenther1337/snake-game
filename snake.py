@@ -5,7 +5,7 @@ import pygame,random
 BLUE = (0,0,255)
 RED = (200,0,0)
 GREEN = (0,125,0) # Snake color
-BLACK = (0,0,0)
+BLACK = (15,0,0)
 WHITE = (255,255,255)
 
 # Board Stats
@@ -68,7 +68,7 @@ def check_apple(snake_body: list, apples: list):
 
 # Draws the current score to screen
 def draw_score(score: int):
-    value = score_font.render(f"SCORE: {score}", True, BLACK)
+    value = score_font.render(f"SCORE: {score}", True, WHITE)
     display.blit(value,[0,0])
 
 running = True
@@ -76,15 +76,15 @@ try_again = True
 
 
 def end_screen(running, try_again):
-    value = score_font.render(f"SCORE: {score}", True, BLACK)
+    value = score_font.render(f"SCORE: {score}", True, WHITE)
     text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,(DISPLAY_SIZE[1]/2)-70))
     display.blit(value,text_rect)
 
-    value = lose_font.render(f"YOU LOSE!", True, BLACK)
+    value = lose_font.render(f"YOU LOSE!", True, WHITE)
     text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,DISPLAY_SIZE[1]/2))
     display.blit(value,text_rect)
 
-    value = end_font.render(f"PRESS SAPCE TO CONTINUE OR ESACPE TO QUIT!", True, BLACK)
+    value = end_font.render(f"PRESS SAPCE TO CONTINUE OR ESACPE TO QUIT!", True, WHITE)
     text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,(DISPLAY_SIZE[1]/2)+70))
     display.blit(value,text_rect)
     pygame.display.update()
@@ -120,7 +120,7 @@ while try_again:
     apples = []
 
     while running:
-        display.fill("white")
+        display.fill("GRAY")
 
         # Key handling
         for event in pygame.event.get():
@@ -169,7 +169,7 @@ while try_again:
             displaying_apple = check_apple(snake_body,apples)
 
             if not displaying_apple:
-                snake_speed += speed_change
+                snake_speed += speed_change if snake_speed <= 15 else 0
                 snake_length += 1
                 score += 1
                 apples.remove((snake_body[-1][0],snake_body[-1][1]))
