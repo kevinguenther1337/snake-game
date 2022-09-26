@@ -1,16 +1,16 @@
 
+from venv import create
 import pygame,random
 
 # Colors
-BLUE = (0,0,255)
-RED = (200,0,0)
+RED = (200,51,51)
 GREEN = (0,125,0) # Snake color
-BLACK = (15,0,0)
-WHITE = (255,255,255)
+TEXT_COLOR = (255,128,0)
+BLACK = (0,0,0)
 
 # Board Stats
-BOX_SIZE = 30 # must be number % 2 = 0 
-BOARD_SIZE = 30
+BOX_SIZE = 26 # must be number % 2 = 0 
+BOARD_SIZE = 38
 DISPLAY_SIZE = ((BOX_SIZE*BOARD_SIZE),(BOX_SIZE*BOARD_SIZE))
 AMOUNT_OF_APPLES = 3
 
@@ -27,7 +27,7 @@ lose_font = pygame.font.SysFont("comicsansms",60)
 
 
 # Checks if the player hits wall or himself
-def check_collision(snake: list):
+def check_collision_for_snake(snake: list):
     # Check if snake hits wall
     if snake[-1][1] >= DISPLAY_SIZE[1] or snake[-1][1] < 0 or snake[-1][0] >= DISPLAY_SIZE[0] or snake[-1][0] < 0:
         return False
@@ -40,27 +40,28 @@ def check_collision(snake: list):
     return True
 
 
-# Draws apple to screen
-def draw_apple(apples : list, apple_counter : int, amount_of_apples : int):
+# Creates object on random position
+# (Object to create, object counter, max amount, other coordinate to check pos for)
+def create_object(coordinates : list, object_counter : int, amount_of_objects : int, other_coordinates : list):
 
-    while len(apples) < amount_of_apples:
-        apple_x = random.randrange(BOX_SIZE,(DISPLAY_SIZE[0]-BOX_SIZE),BOX_SIZE)
-        apple_y = random.randrange(BOX_SIZE,(DISPLAY_SIZE[1]-BOX_SIZE),BOX_SIZE)
+    while len(coordinates) < amount_of_objects:
+        pos_x = random.randrange(BOX_SIZE,(DISPLAY_SIZE[0]-BOX_SIZE),BOX_SIZE)
+        pos_y = random.randrange(BOX_SIZE,(DISPLAY_SIZE[1]-BOX_SIZE),BOX_SIZE)
 
         # check if apple spawns inside of snake, recurssively draws apple again
-        if (apple_x,apple_y) in snake_body or (apple_x,apple_y) in apples:
-            draw_apple(apples,apple_counter,amount_of_apples)
+        if (pos_x,pos_y) in snake_body or (pos_x,pos_y) in coordinates or (pos_x,pos_y) in other_coordinates:
+            create_object(coordinates,object_counter,amount_of_objects, other_coordinates)
         else:
-            apples.append((apple_x,apple_y))
-            apple_counter += 1
+            coordinates.append((pos_x,pos_y))
+            object_counter += 1
 
     return True
 
 
-# Checks if the apple has been eaten
-def check_apple(snake_body: list, apples: list):
-    for apple in apples:
-        if (snake_body[-1][0],snake_body[-1][1]) == (apple[0],apple[1]):
+# Checks if the object is hit
+def check_colission_with_object(snake_body: list, objects: list):
+    for object in objects:
+        if (snake_body[-1][0],snake_body[-1][1]) == (object[0],object[1]):
             return False
         
     return True
@@ -68,23 +69,23 @@ def check_apple(snake_body: list, apples: list):
 
 # Draws the current score to screen
 def draw_score(score: int):
-    value = score_font.render(f"SCORE: {score}", True, WHITE)
+    value = score_font.render(f"SCORE: {score}", True, TEXT_COLOR)
     display.blit(value,[0,0])
 
+# Game options
 running = True
 try_again = True
 
-
 def end_screen(running, try_again):
-    value = score_font.render(f"SCORE: {score}", True, WHITE)
+    value = score_font.render(f"SCORE: {score}", True, TEXT_COLOR)
     text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,(DISPLAY_SIZE[1]/2)-70))
     display.blit(value,text_rect)
 
-    value = lose_font.render(f"YOU LOSE!", True, WHITE)
+    value = lose_font.render(f"YOU LOSE!", True, TEXT_COLOR)
     text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,DISPLAY_SIZE[1]/2))
     display.blit(value,text_rect)
 
-    value = end_font.render(f"PRESS SAPCE TO CONTINUE OR ESACPE TO QUIT!", True, WHITE)
+    value = end_font.render(f"PRESS SAPCE TO CONTINUE OR ESACPE TO QUIT!", True, TEXT_COLOR)
     text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2,(DISPLAY_SIZE[1]/2)+70))
     display.blit(value,text_rect)
     pygame.display.update()
@@ -105,6 +106,8 @@ def end_screen(running, try_again):
 
 while try_again:     
 
+    # Sets game stats to default
+
     # Snake starting stats
     snake_length = 5
     snake_speed = 13.0
@@ -116,11 +119,17 @@ while try_again:
     # Game stats
     score = 0
     displaying_apple = False
+    displaying_landmines = False
+
+    # Object stats 
     apple_counter = 0
+    landmine_counter = 0
+    max_amount_of_landmines = 3
     apples = []
+    landmines = []
 
     while running:
-        display.fill("GRAY")
+        display.fill("White")
 
         # Key handling
         for event in pygame.event.get():
@@ -143,8 +152,7 @@ while try_again:
                 elif event.key == pygame.K_LEFT:
                     x_change = -BOX_SIZE
                     y_change = 0
-
-            
+ 
         # Main part 
         if running:
             # Append current coordinates to snake body
@@ -155,7 +163,10 @@ while try_again:
                 snake_body.pop(0)
 
             # Check if the player hits body / window wall
-            running = check_collision(snake_body)
+            running = check_collision_for_snake(snake_body)
+            if running:
+                # Check if snake hits landmine
+                running = check_colission_with_object(snake_body,landmines)
 
             # Draw snake body
             for segment in snake_body:
@@ -163,19 +174,33 @@ while try_again:
 
             # Checks if apple is on board, if not draws new apple
             if not displaying_apple:
-                displaying_apple = draw_apple(apples,apple_counter, AMOUNT_OF_APPLES)
+                displaying_apple = create_object(apples,apple_counter, AMOUNT_OF_APPLES, landmines)
 
             # Check if player eats apple
-            displaying_apple = check_apple(snake_body,apples)
+            displaying_apple = check_colission_with_object(snake_body,apples)
+
+            if not displaying_landmines:
+                displaying_landmines = create_object(landmines,landmine_counter,max_amount_of_landmines, apples)
 
             if not displaying_apple:
+                # Adds speed_change to the current speed if snake_speed is lower than 15
                 snake_speed += speed_change if snake_speed <= 15 else 0
                 snake_length += 1
                 score += 1
+                # Adds one landmine to the game every 5th score
+                if score % 5 == 0:
+                    max_amount_of_landmines += 1
+                    displaying_landmines = False
+                # Removes the eaten apple from game    
                 apples.remove((snake_body[-1][0],snake_body[-1][1]))
 
+            # Draws apples to board
             for apple in apples:
                 pygame.draw.rect(display, RED, [apple[0], apple[1], BOX_SIZE, BOX_SIZE])
+            
+            # Draws landmines to board 
+            for landmine in landmines:
+                pygame.draw.rect(display, BLACK, [landmine[0], landmine[1], BOX_SIZE, BOX_SIZE])
         
         # Draw current score
         draw_score(score)
