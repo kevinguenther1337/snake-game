@@ -25,16 +25,17 @@ score_font = pygame.font.SysFont("comicsansms", 40)
 end_font = pygame.font.SysFont("comicsansms", 20)
 lose_font = pygame.font.SysFont("comicsansms", 60)
 
-#TODO: Add Sound effects, new board design, new features?
+# TODO: Add Sound effects, new board design, new features?
 
 
 # Checks if the player hits wall or himself
 def check_snake_collision(snake: list):
     # Check if snake hits window wall
-    if snake[-1][1] >= DISPLAY_SIZE[1] or snake[-1][1] < 0 or snake[-1][0] >= DISPLAY_SIZE[0] or snake[-1][0] < 0:
+    if snake[-1][1] >= DISPLAY_SIZE[1] or snake[-1][1] < 0 or\
+            snake[-1][0] >= DISPLAY_SIZE[0] or snake[-1][0] < 0:
         return False
     else:
-        # Check if snake hits body part 
+        # Check if snake hits body part
         return False if snake[-1] in snake[:-1] else True
 
 
@@ -44,10 +45,10 @@ def create_object(cords: list, am_object: int, other_cords: list):
     while len(cords) < am_object:
         new_cords = (
             random.randrange(BLOCK_SIZE, (
-            DISPLAY_SIZE[0]-BLOCK_SIZE), BLOCK_SIZE),
+                DISPLAY_SIZE[0]-BLOCK_SIZE), BLOCK_SIZE),
             random.randrange(BLOCK_SIZE, (
-            DISPLAY_SIZE[0]-BLOCK_SIZE), BLOCK_SIZE))
-       
+                DISPLAY_SIZE[0]-BLOCK_SIZE), BLOCK_SIZE))
+
         # check if apple spawns inside of snake, recurssively creates new cords
         if new_cords in snake_body or new_cords in cords or\
                 new_cords in other_cords:
@@ -164,9 +165,11 @@ while try_again:
             # Draw snake body
             for part in snake_body:
                 pygame.draw.rect(
-                    display, (0,60,0), [part[0], part[1], BLOCK_SIZE, BLOCK_SIZE])
+                    display, (0, 60, 0),
+                    [part[0], part[1], BLOCK_SIZE, BLOCK_SIZE])
                 pygame.draw.rect(
-                    display, SNAKE_CL, [part[0], part[1], BLOCK_SIZE-2, BLOCK_SIZE-2])
+                    display, SNAKE_CL,
+                    [part[0], part[1], BLOCK_SIZE-2, BLOCK_SIZE-2])
 
             # Checks if apple is on board, if not draws new apple
             if not displaying_apple:
@@ -197,9 +200,11 @@ while try_again:
             # Draws apples to board
             for apple in apples:
                 pygame.draw.rect(
-                    display, (140,0,0), [apple[0], apple[1], BLOCK_SIZE, BLOCK_SIZE])
+                    display, (140, 0, 0),
+                    [apple[0], apple[1], BLOCK_SIZE, BLOCK_SIZE])
                 pygame.draw.rect(
-                    display, APPLE_CL, [apple[0], apple[1], BLOCK_SIZE-2, BLOCK_SIZE-2])
+                    display, APPLE_CL,
+                    [apple[0], apple[1], BLOCK_SIZE-2, BLOCK_SIZE-2])
 
             # Draws landmines to board
             if landmines:
@@ -209,7 +214,8 @@ while try_again:
                             landmine[0], landmine[1], BLOCK_SIZE, BLOCK_SIZE])
                     pygame.draw.rect(
                         display, (255, 255, 255), [
-                            landmine[0], landmine[1], BLOCK_SIZE-2, BLOCK_SIZE-2])
+                            landmine[0], landmine[1],
+                            BLOCK_SIZE-2, BLOCK_SIZE-2])
 
         draw_score(score)
 
