@@ -7,12 +7,14 @@ SNAKE_CL = (0, 100, 0)  # Snake color
 TEXT_CL = (255, 255, 255)
 
 # Board Stats
-BLOCK_SIZE = 40  # must be number % 2 = 0
+MAX_SPEED = 17.0
+BLOCK_SIZE = 30  # must be number % 2 = 0
 BOARD_SIZE = 24
 DISPLAY_SIZE = ((BLOCK_SIZE*BOARD_SIZE), (BLOCK_SIZE*BOARD_SIZE))
-AMOUNT_OF_APPLES = 6  # Amount of apples which spawn on the board
+AMOUNT_OF_APPLES = 32 # Amount of apples which spawn on the board
 
 # Option stuff
+FONT_NAME = "Arial Black"
 pygame.init()
 clock = pygame.time.Clock()
 display = pygame.display.set_mode(DISPLAY_SIZE)
@@ -21,9 +23,9 @@ running = True
 try_again = True
 
 # Fonts
-score_font = pygame.font.SysFont("comicsansms", 40)
-end_font = pygame.font.SysFont("comicsansms", 20)
-lose_font = pygame.font.SysFont("comicsansms", 60)
+score_font = pygame.font.SysFont(FONT_NAME, 30)
+end_font = pygame.font.SysFont(FONT_NAME, 20)
+lose_font = pygame.font.SysFont(FONT_NAME, 60)
 
 # TODO: Add Sound effects, new board design, new features?
 
@@ -72,7 +74,7 @@ def draw_score(score: int):
 def end_screen(running, try_again):
     value = score_font.render(f"SCORE: {score}", True, TEXT_CL)
     text_rect = value.get_rect(center=(
-        DISPLAY_SIZE[0]/2, (DISPLAY_SIZE[1]/2)-70))
+        DISPLAY_SIZE[0]/2, (DISPLAY_SIZE[1]/2)-40))
     display.blit(value, text_rect)
 
     value = lose_font.render("YOU LOSE!", True, TEXT_CL)
@@ -80,9 +82,9 @@ def end_screen(running, try_again):
     display.blit(value, text_rect)
 
     value = end_font.render(
-        "PRESS SAPCE TO CONTINUE OR ESACPE TO QUIT!", True, TEXT_CL)
+        "PRESS SPACE TO CONTINUE OR ESACPE TO QUIT!", True, TEXT_CL)
     text_rect = value.get_rect(center=(DISPLAY_SIZE[0]/2, (
-        DISPLAY_SIZE[1]/2)+70))
+        DISPLAY_SIZE[1]/2)+40))
     display.blit(value, text_rect)
     pygame.display.update()
 
@@ -103,13 +105,13 @@ def end_screen(running, try_again):
 while try_again:
 
     # == Default settings ==
-    snake_length = 5  # Starting length of snake
+    snake_length = 3  # Starting length of snake
     speed = 13.0
-    MAX_SPEED = 16.0
     speed_change = 0.125
-    snake_body = [(BLOCK_SIZE*BOARD_SIZE/2, BLOCK_SIZE*BOARD_SIZE/2)]
+    snake_body = [(BLOCK_SIZE*BOARD_SIZE/2, BLOCK_SIZE*BOARD_SIZE/2)]  # Spawns snake at mid of the board
+    # Inital movement => up 
     x_change = 0
-    y_change = -BLOCK_SIZE  # UP
+    y_change = -BLOCK_SIZE
 
     # Game stats
     score = 0
@@ -131,21 +133,33 @@ while try_again:
                 pygame.quit()
                 quit()
             if event.type == pygame.KEYDOWN:  # if key is pressed
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
                     y_change = -BLOCK_SIZE
                     x_change = 0
 
-                elif event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                     y_change = BLOCK_SIZE
                     x_change = 0
 
-                elif event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                     x_change = BLOCK_SIZE
                     y_change = 0
 
-                elif event.key == pygame.K_LEFT:
+                elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     x_change = -BLOCK_SIZE
                     y_change = 0
+                elif event.key == pygame.K_p:
+                    paused = True
+                    # Pause game
+                    while paused:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                pygame.quit()
+                                quit()
+                            elif event.type == pygame.KEYDOWN:
+                                paused = False if event.key == pygame.K_p else True
+                        clock.tick(speed)
+
 
         # Main part
         if running:
@@ -186,13 +200,13 @@ while try_again:
                 snake_length += 1
                 score += 1
                 # Adds one landmine to the game every 5th eaten apple
-                if landmines and score % 5 == 0:
+                if landmines and (score % 5 == 0):
                     amount_of_landmines += 1
                     displaying_landmines = False
 
                 # Removes the eaten apple from game
                 apples.remove((snake_body[-1][0], snake_body[-1][1]))
-
+    
             if landmines and not displaying_landmines:
                 displaying_landmines = create_object(
                     landmine_cords, amount_of_landmines, apples)
@@ -217,9 +231,9 @@ while try_again:
                             landmine[0], landmine[1],
                             BLOCK_SIZE-2, BLOCK_SIZE-2])
 
+        # Update game
         draw_score(score)
 
-        # Update game
         pygame.display.update()
         clock.tick(speed)
 
