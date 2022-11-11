@@ -3,36 +3,34 @@ import pygame
 
 # Colors
 APPLE_CL = (180, 0, 0)
-SNAKE_CL = (0, 100, 0)  # Snake color
+SNAKE_CL = (0, 100, 0)
 TEXT_CL = (255, 255, 255)
 
 # Board Stats
-MAX_SPEED = 17.0
-BLOCK_SIZE = 30  # must be number % 2 = 0
-BOARD_SIZE = 24
+MAX_SPEED = 18.0
+BLOCK_SIZE = 34 # must be number % 2 = 0
+BOARD_SIZE = 22
 DISPLAY_SIZE = ((BLOCK_SIZE*BOARD_SIZE), (BLOCK_SIZE*BOARD_SIZE))
-AMOUNT_OF_APPLES = 32 # Amount of apples which spawn on the board
+AMOUNT_OF_APPLES =  4 # Amount of apples which spawn on the board
 
 # Option stuff
-FONT_NAME = "Arial Black"
 pygame.init()
 clock = pygame.time.Clock()
-display = pygame.display.set_mode(DISPLAY_SIZE)
-pygame.display.set_caption("Snake Game V1.1")
+display = pygame.display.set_mode(DISPLAY_SIZE, 0, 0, 0, 144)
+pygame.display.set_caption("Snake Game V1.2")
 running = True
 try_again = True
 
 # Fonts
+FONT_NAME = "Arial Black"
 score_font = pygame.font.SysFont(FONT_NAME, 30)
 end_font = pygame.font.SysFont(FONT_NAME, 20)
 lose_font = pygame.font.SysFont(FONT_NAME, 60)
 
-# TODO: Add Sound effects, new board design, new features?
-
 
 # Checks if the player hits wall or himself
 def check_snake_collision(snake: list):
-    # Check if snake hits window wall
+    # Check if snake hits wall
     if snake[-1][1] >= DISPLAY_SIZE[1] or snake[-1][1] < 0 or\
             snake[-1][0] >= DISPLAY_SIZE[0] or snake[-1][0] < 0:
         return False
@@ -88,6 +86,7 @@ def end_screen(running, try_again):
     display.blit(value, text_rect)
     pygame.display.update()
 
+    # Get user input
     while not running and try_again:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -105,22 +104,22 @@ def end_screen(running, try_again):
 while try_again:
 
     # == Default settings ==
-    snake_length = 3  # Starting length of snake
-    speed = 13.0
     speed_change = 0.125
-    snake_body = [(BLOCK_SIZE*BOARD_SIZE/2, BLOCK_SIZE*BOARD_SIZE/2)]  # Spawns snake at mid of the board
-    # Inital movement => up 
+    snake_body = [(BLOCK_SIZE*BOARD_SIZE/2, BLOCK_SIZE*BOARD_SIZE/2)]  # Snake starting position
+    displaying_apple = False
+    displaying_landmines = False
+    landmines = True
+
+    # Inital movement => up
     x_change = 0
     y_change = -BLOCK_SIZE
 
-    # Game stats
+    # Game settings
     score = 0
-    displaying_apple = False
-    displaying_landmines = False
+    snake_length = 3  # Starting length of snake
+    speed = 12
 
     # Object stats
-    landmines = True  # Set counter to at least 1 to play with landmines
-    amount_of_landmines = 0
     apples = []
     landmine_cords = []
 
@@ -157,9 +156,11 @@ while try_again:
                                 pygame.quit()
                                 quit()
                             elif event.type == pygame.KEYDOWN:
-                                paused = False if event.key == pygame.K_p else True
-                        clock.tick(speed)
-
+                                paused = False if event.key == pygame.K_p or event.key == pygame.K_SPACE else True
+                                quit() if event.key == pygame.K_ESCAPE else None
+                        clock.tick(144)
+                elif event.key == pygame.K_ESCAPE:
+                    quit()
 
         # Main part
         if running:
@@ -199,17 +200,24 @@ while try_again:
                 speed += speed_change if speed < MAX_SPEED else 0
                 snake_length += 1
                 score += 1
-                # Adds one landmine to the game every 5th eaten apple
+
+                # Adds one landmine to the game every x eaten apple
                 if landmines and (score % 5 == 0):
-                    amount_of_landmines += 1
-                    displaying_landmines = False
+                    displaying_landmines = create_object(
+                        landmine_cords, len(landmine_cords) + 1, apples)
 
                 # Removes the eaten apple from game
                 apples.remove((snake_body[-1][0], snake_body[-1][1]))
-    
+
             if landmines and not displaying_landmines:
                 displaying_landmines = create_object(
-                    landmine_cords, amount_of_landmines, apples)
+                    landmine_cords, len(landmine_cords), apples)
+
+                # Replacing every x mines position for more randomness
+                if len(landmine_cords) % 5 == 0 and len(landmine_cords) != 0:
+                    landmine_cords.pop(random.randrange(0,len(landmine_cords)))
+                    displaying_landmines = create_object(
+                        landmine_cords, len(landmine_cords), apples)
 
             # Draws apples to board
             for apple in apples:
@@ -233,7 +241,6 @@ while try_again:
 
         # Update game
         draw_score(score)
-
         pygame.display.update()
         clock.tick(speed)
 
