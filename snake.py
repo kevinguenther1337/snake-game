@@ -13,7 +13,7 @@ BLOCK_SIZE = 34 # must be number % 2 = 0
 BOARD_SIZE = 22
 DISPLAY_SIZE = ((BLOCK_SIZE*BOARD_SIZE), (BLOCK_SIZE*BOARD_SIZE))
 AMOUNT_OF_APPLES =  4 # Amount of apples which spawn on the board
-COLOR_MODE = False
+COLOR_MODE = True
  
 # Option stuff
 pygame.init()
@@ -241,10 +241,10 @@ while try_again:
             if landmines:
                 for landmine in landmine_cords:
                     pygame.draw.rect(
-                        display, (200, 200, 200), [
+                        display, (100, 100, 100), [
                             landmine[0], landmine[1], BLOCK_SIZE, BLOCK_SIZE])
                     pygame.draw.rect(
-                        display, (255, 255, 255), [
+                        display, (128, 128, 128), [
                             landmine[0], landmine[1],
                             BLOCK_SIZE-2, BLOCK_SIZE-2])
 
