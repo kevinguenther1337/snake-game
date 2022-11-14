@@ -5,6 +5,7 @@ import pygame
 APPLE_CL = (180, 0, 0)
 SNAKE_CL = (0, 100, 0)
 TEXT_CL = (255, 255, 255)
+COLOR_LIST = [(0, 0, 255), (0,127,255), (0, 0, 255), (255, 128, 0), (255, 0 , 255), (0, 255, 0), (255, 0, 0),   ]
 
 # Board Stats
 MAX_SPEED = 18.0
@@ -12,7 +13,8 @@ BLOCK_SIZE = 34 # must be number % 2 = 0
 BOARD_SIZE = 22
 DISPLAY_SIZE = ((BLOCK_SIZE*BOARD_SIZE), (BLOCK_SIZE*BOARD_SIZE))
 AMOUNT_OF_APPLES =  4 # Amount of apples which spawn on the board
-
+COLOR_MODE = False
+ 
 # Option stuff
 pygame.init()
 clock = pygame.time.Clock()
@@ -108,7 +110,7 @@ while try_again:
     snake_body = [(BLOCK_SIZE*BOARD_SIZE/2, BLOCK_SIZE*BOARD_SIZE/2)]  # Snake starting position
     displaying_apple = False
     displaying_landmines = False
-    landmines = True
+    landmines = True # Adds landmines to the game
 
     # Inital movement => up
     x_change = 0
@@ -132,19 +134,21 @@ while try_again:
                 pygame.quit()
                 quit()
             if event.type == pygame.KEYDOWN:  # if key is pressed
-                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                if (event.key == pygame.K_UP or event.key == pygame.K_w) \
+                    and not (y_change == BLOCK_SIZE and x_change == 0):
                     y_change = -BLOCK_SIZE
                     x_change = 0
 
-                elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) \
+                    and not (y_change == -BLOCK_SIZE and x_change == 0):
                     y_change = BLOCK_SIZE
                     x_change = 0
-
-                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                elif (event.key == pygame.K_RIGHT or event.key == pygame.K_d) \
+                    and not (y_change == 0 and x_change == -BLOCK_SIZE):
                     x_change = BLOCK_SIZE
                     y_change = 0
-
-                elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                elif (event.key == pygame.K_LEFT or event.key == pygame.K_a) \
+                    and not (y_change == 0 and x_change == BLOCK_SIZE):
                     x_change = -BLOCK_SIZE
                     y_change = 0
                 elif event.key == pygame.K_p:
@@ -182,9 +186,14 @@ while try_again:
                 pygame.draw.rect(
                     display, (0, 60, 0),
                     [part[0], part[1], BLOCK_SIZE, BLOCK_SIZE])
-                pygame.draw.rect(
-                    display, SNAKE_CL,
-                    [part[0], part[1], BLOCK_SIZE-2, BLOCK_SIZE-2])
+                if COLOR_MODE:
+                    pygame.draw.rect(
+                        display, random.choice(COLOR_LIST),
+                        [part[0], part[1], BLOCK_SIZE-2, BLOCK_SIZE-2])
+                else:
+                    pygame.draw.rect(
+                        display, (0, 130, 0),
+                        [part[0], part[1], BLOCK_SIZE-2, BLOCK_SIZE-2])
 
             # Checks if apple is on board, if not draws new apple
             if not displaying_apple:
@@ -196,8 +205,8 @@ while try_again:
 
             if not displaying_apple:
                 # Adds speed_change to the current speed if snake_speed
-                # is lower than SNAKE_MAX_SPEED
-                speed += speed_change if speed < MAX_SPEED else 0
+                # is lower than MAX_SPEED
+                speed += speed_change if speed < MAX_SPEED else 0.02
                 snake_length += 1
                 score += 1
 
