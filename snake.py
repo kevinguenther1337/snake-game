@@ -5,16 +5,17 @@ import pygame
 APPLE_CL = (180, 0, 0)
 SNAKE_CL = (0, 100, 0)
 TEXT_CL = (255, 255, 255)
-COLOR_LIST = [(0, 0, 255), (0,127,255), (0, 0, 255), (255, 128, 0), (255, 0 , 255), (0, 255, 0), (255, 0, 0),   ]
+COLOR_LIST = [(0, 0, 255), (0, 127, 255), (0, 0, 255), (255, 128, 0), (
+    255, 0, 255), (0, 255, 0), (255, 0, 0)]
 
 # Board Stats
 MAX_SPEED = 18.0
-BLOCK_SIZE = 34 # must be number % 2 = 0
+BLOCK_SIZE = 34  # must be number % 2 = 0
 BOARD_SIZE = 22
 DISPLAY_SIZE = ((BLOCK_SIZE*BOARD_SIZE), (BLOCK_SIZE*BOARD_SIZE))
-AMOUNT_OF_APPLES =  4 # Amount of apples which spawn on the board
-COLOR_MODE = True
- 
+AMOUNT_OF_APPLES = (BLOCK_SIZE * BOARD_SIZE) / 60  # Amount of apples
+COLOR_MODE = False
+
 # Option stuff
 pygame.init()
 clock = pygame.time.Clock()
@@ -67,7 +68,7 @@ def colission_with_object(snake_body: list, objects: list):
 
 # Draws score
 def draw_score(score: int):
-    value = score_font.render(f"SCORE: {score}", True, TEXT_CL)
+    value = score_font.render(f"{score}", True, TEXT_CL)
     display.blit(value, [0, 0])
 
 
@@ -107,10 +108,10 @@ while try_again:
 
     # == Default settings ==
     speed_change = 0.125
-    snake_body = [(BLOCK_SIZE*BOARD_SIZE/2, BLOCK_SIZE*BOARD_SIZE/2)]  # Snake starting position
+    snake_body = [(BLOCK_SIZE*BOARD_SIZE/2, BLOCK_SIZE*BOARD_SIZE/2)]
     displaying_apple = False
     displaying_landmines = False
-    landmines = True # Adds landmines to the game
+    landmines = True  # Adds landmines to the game
 
     # Inital movement => up
     x_change = 0
@@ -135,20 +136,20 @@ while try_again:
                 quit()
             if event.type == pygame.KEYDOWN:  # if key is pressed
                 if (event.key == pygame.K_UP or event.key == pygame.K_w) \
-                    and not (y_change == BLOCK_SIZE and x_change == 0):
+                        and not (y_change == BLOCK_SIZE and x_change == 0):
                     y_change = -BLOCK_SIZE
                     x_change = 0
 
                 elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) \
-                    and not (y_change == -BLOCK_SIZE and x_change == 0):
+                        and not (y_change == -BLOCK_SIZE and x_change == 0):
                     y_change = BLOCK_SIZE
                     x_change = 0
                 elif (event.key == pygame.K_RIGHT or event.key == pygame.K_d) \
-                    and not (y_change == 0 and x_change == -BLOCK_SIZE):
+                        and not (y_change == 0 and x_change == -BLOCK_SIZE):
                     x_change = BLOCK_SIZE
                     y_change = 0
                 elif (event.key == pygame.K_LEFT or event.key == pygame.K_a) \
-                    and not (y_change == 0 and x_change == BLOCK_SIZE):
+                        and not (y_change == 0 and x_change == BLOCK_SIZE):
                     x_change = -BLOCK_SIZE
                     y_change = 0
                 elif event.key == pygame.K_p:
@@ -224,7 +225,8 @@ while try_again:
 
                 # Replacing every x mines position for more randomness
                 if len(landmine_cords) % 5 == 0 and len(landmine_cords) != 0:
-                    landmine_cords.pop(random.randrange(0,len(landmine_cords)))
+                    landmine_cords.pop(
+                        random.randrange(0, len(landmine_cords)))
                     displaying_landmines = create_object(
                         landmine_cords, len(landmine_cords), apples)
 
